@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Satyukt Assignment</title>
+</head>
+<body>
+	<div id="chartContainer" style="height: 300px; width: 100%;"> Loading, please wait....!!!</div>
+	
+<script src="jquery.min.js"></script>
+<script src="canvas.min.js"></script>
+<script>
+$(document).ready(function () {
+	var apiUrl = 'https://micro.satyukt.com/weather/data/daypart?key=i2z_SxtHkU36Y6sDjDeeZ5VfZ0cw30A9GjJrGSAEupc=&farm_id=1516';
+
+	$.ajax({
+		type: "GET",
+		url: apiUrl,
+		async: false,
+		dataType: "json",
+		success: function(data) {
+			renderChart(data);
+		},
+		error: function() {
+			alert('Error occured');
+		}
+	});
+});
+
+function renderChart(temperatureData) {
+	var graphData = [];
+	$.each(temperatureData, function(key,value) {
+		var fullDate = new Date(value.sunriseTimeLocal);
+		var minMaxTemp = JSON.parse(value.temperature);
+		graphData.push({
+			x: fullDate,
+			y: [minMaxTemp[1],minMaxTemp[0]]			
+		});
+	});
+	
+	var chart = new CanvasJS.Chart("chartContainer", {
+		exportEnabled: true,
+		animationEnabled: true,
+		title:{
+			text: "Average Expected Temperature"
+		},		
+		axisX: {
+			title: "Date (DD MMM YYYY)",
+			valueFormatString: "DD MMM YYYY"
+		},
+		axisY: { 
+			title: "Temperature (°C)",
+			suffix: " °C"
+		},
+		data: [{
+			type: "rangeSplineArea",
+			indexLabel: "{y[#index]}°",
+			xValueFormatString: "DD MMM YYYY",
+			toolTipContent: "{x} </br> <strong>Temperature: </strong> </br> Min: {y[0]} °C, Max: {y[1]} °C",
+			dataPoints: graphData
+		}]
+	});
+	chart.render();
+}
+
+</script>
+</body>
+</html>
